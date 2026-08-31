@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "देसी Aahhar",
-    "slug": "desi-aahhar",
+    "slug": "deshi-ahhar",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/brand/desi-aahhar-logo.png",
@@ -39,6 +39,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "5da471e4-283a-49a6-91d6-fd1e274652bb"
+      }
+    },
+    "owner": "vid687s-team"
   }
 }
