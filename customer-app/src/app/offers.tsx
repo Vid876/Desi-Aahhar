@@ -5,10 +5,11 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AppHeader } from '@/components/AppHeader';
 import { Screen } from '@/components/Screen';
-import { coupons } from '@/data/catalog';
+import { useApp } from '@/context/AppContext';
 import { colors, formatCurrency, radius, spacing } from '@/theme';
 
 export default function OffersScreen() {
+  const { coupons } = useApp();
   const [copied, setCopied] = useState('');
   const copy = async (code: string) => { await Clipboard.setStringAsync(code); setCopied(code); setTimeout(() => setCopied(''), 1600); };
   return (

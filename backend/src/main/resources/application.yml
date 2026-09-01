@@ -1,0 +1,77 @@
+spring:
+  application:
+    name: desi-aahhar-api
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/desiaahhar}
+    username: ${DATABASE_USERNAME:desiaahhar}
+    password: ${DATABASE_PASSWORD:desiaahhar}
+    hikari:
+      maximum-pool-size: ${DATABASE_POOL_SIZE:10}
+  flyway:
+    enabled: true
+  jackson:
+    default-property-inclusion: non_null
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${SMTP_STARTTLS:false}
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
+
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+app:
+  public-base-url: ${PUBLIC_BASE_URL:http://localhost:8080}
+  uploads-dir: ${UPLOADS_DIR:./uploads}
+  jwt:
+    secret: ${JWT_SECRET:desi-aahhar-local-development-secret-change-before-production-2026}
+    ttl-hours: ${JWT_TTL_HOURS:168}
+  cors-origins: ${CORS_ORIGINS:http://localhost:5173,http://localhost:8081,http://localhost:19006}
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  otp:
+    ttl-minutes: ${OTP_TTL_MINUTES:10}
+    dev-code: ${DEV_OTP_CODE:123456}
+    expose-dev-code: ${EXPOSE_DEV_OTP:true}
+  twilio:
+    account-sid: ${TWILIO_ACCOUNT_SID:}
+    auth-token: ${TWILIO_AUTH_TOKEN:}
+    verify-service-sid: ${TWILIO_VERIFY_SERVICE_SID:}
+  smtp:
+    enabled: ${SMTP_ENABLED:false}
+    from: ${SMTP_FROM:no-reply@desiaahhar.in}
+  razorpay:
+    key-id: ${RAZORPAY_KEY_ID:}
+    key-secret: ${RAZORPAY_KEY_SECRET:}
+    webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
+  firebase:
+    enabled: ${FIREBASE_ENABLED:false}
+    project-id: ${FIREBASE_PROJECT_ID:}
+    credentials-path: ${GOOGLE_APPLICATION_CREDENTIALS:}
+  bootstrap:
+    admin-name: ${ADMIN_NAME:Desi Aahhar Admin}
+    admin-email: ${ADMIN_EMAIL:admin@desiaahhar.in}
+    admin-password: ${ADMIN_PASSWORD:Admin@123}
+    staff-name: ${STAFF_NAME:Ravi Delivery}
+    staff-email: ${STAFF_EMAIL:delivery@desiaahhar.in}
+    staff-password: ${STAFF_PASSWORD:Delivery@123}
+
+logging:
+  level:
+    in.desiaahhar: INFO

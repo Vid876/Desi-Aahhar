@@ -16,14 +16,21 @@ export default function CheckoutScreen() {
   const { cartItems, cartSubtotal, discount, deliveryFee, grandTotal, selectedAddress, placeOrder, ruleValidation } = useApp();
   const [slot, setSlot] = useState(slots[0]);
   const [payment, setPayment] = useState<'COD' | 'ONLINE'>('COD');
+  const [placing, setPlacing] = useState(false);
 
   if (!cartItems.length) return <Screen><AppHeader title="Checkout" /><View style={styles.empty}><Text style={styles.emptyText}>Cart is empty.</Text><PrimaryButton label="Browse products" onPress={() => router.replace('/(tabs)/home')} /></View></Screen>;
 
-  const confirm = () => {
+  const confirm = async () => {
     if (!ruleValidation.valid) { Alert.alert('Minimum order not met', `Eligible grocery में ${formatCurrency(ruleValidation.remaining)} और जोड़ें।`); return; }
-    if (payment === 'ONLINE') Alert.alert('Demo payment', 'Production में यहाँ Razorpay checkout खुलेगा। Demo order अभी confirm किया जा रहा है।');
-    const order = placeOrder(payment, slot);
-    router.replace({ pathname: '/order-success', params: { id: order.id } });
+    try {
+      setPlacing(true);
+      const order = await placeOrder(payment, slot);
+      router.replace({ pathname: '/order-success', params: { id: order.id } });
+    } catch (error) {
+      Alert.alert(payment === 'ONLINE' ? 'Payment पूरा नहीं हुआ' : 'Order place नहीं हुआ', error instanceof Error ? error.message : 'कृपया दोबारा कोशिश करें।');
+    } finally {
+      setPlacing(false);
+    }
   };
 
   return (
@@ -49,7 +56,7 @@ export default function CheckoutScreen() {
         <View style={styles.summaryCard}><PriceSummary subtotal={cartSubtotal} discount={discount} deliveryFee={deliveryFee} total={grandTotal} /></View>
         <View style={styles.safe}><Ionicons name="lock-closed" size={16} color={colors.success} /><Text style={styles.safeText}>Payments are encrypted and secure. Order totals are revalidated by the backend before confirmation.</Text></View>
       </ScrollView>
-      <View style={styles.bottom}><View><Text style={styles.totalLabel}>TO PAY</Text><Text style={styles.total}>{formatCurrency(grandTotal)}</Text></View><PrimaryButton label={payment === 'COD' ? 'Place order' : 'Pay securely'} icon={payment === 'COD' ? 'checkmark-circle' : 'lock-closed'} onPress={confirm} style={styles.button} /></View>
+      <View style={styles.bottom}><View><Text style={styles.totalLabel}>TO PAY</Text><Text style={styles.total}>{formatCurrency(grandTotal)}</Text></View><PrimaryButton label={placing ? 'Please wait…' : payment === 'COD' ? 'Place order' : 'Pay securely'} icon={payment === 'COD' ? 'checkmark-circle' : 'lock-closed'} disabled={placing} onPress={confirm} style={styles.button} /></View>
     </Screen>
   );
 }

@@ -1,0 +1,21 @@
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Screen } from '@/components/Screen';
+import { useDelivery } from '@/context/DeliveryContext';
+import { colors, radius, shadow, spacing } from '@/theme';
+
+export default function Login() {
+  const { signIn } = useDelivery(); const [email,setEmail]=useState('delivery@desiaahhar.in'); const [password,setPassword]=useState('Delivery@123'); const [busy,setBusy]=useState(false); const [error,setError]=useState('');
+  async function submit(){setBusy(true);setError('');try{await signIn(email,password);router.replace('/(tabs)');}catch(e){setError(e instanceof Error?e.message:'Sign in failed');}finally{setBusy(false)}}
+  return <Screen><KeyboardAvoidingView behavior={Platform.OS==='ios'?'padding':undefined} style={styles.page}>
+    <View style={styles.hero}><View style={styles.logo}><Ionicons name="bicycle" size={30} color={colors.forest}/></View><Text style={styles.brand}>देसी Aahhar</Text><Text style={styles.role}>DELIVERY PARTNER</Text><View style={styles.orbit}><Text>🌾</Text><Text>🥬</Text><Text>📦</Text></View></View>
+    <View style={styles.form}><Text style={styles.eyebrow}>STAFF ACCESS</Text><Text style={styles.title}>Ready for today’s route?</Text><Text style={styles.body}>Sign in to view assigned orders and delivery updates.</Text>
+      <View style={styles.input}><Ionicons name="mail-outline" size={19} color={colors.muted}/><TextInput autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} placeholder="Staff email" style={styles.textInput}/></View>
+      <View style={styles.input}><Ionicons name="lock-closed-outline" size={19} color={colors.muted}/><TextInput secureTextEntry value={password} onChangeText={setPassword} placeholder="Password" style={styles.textInput}/></View>
+      {error?<Text style={styles.error}>{error}</Text>:null}<Pressable disabled={busy} onPress={submit} style={styles.button}>{busy?<ActivityIndicator color="white"/>:<><Text style={styles.buttonText}>Start delivering</Text><Ionicons name="arrow-forward" size={18} color="white"/></>}</Pressable>
+      <View style={styles.note}><Ionicons name="shield-checkmark" size={17} color={colors.leaf}/><Text>Local test account is prefilled. Production password must be changed.</Text></View>
+    </View></KeyboardAvoidingView></Screen>;
+}
+const styles=StyleSheet.create({page:{flex:1},hero:{height:'37%',backgroundColor:colors.forest,alignItems:'center',justifyContent:'center',overflow:'hidden',borderBottomLeftRadius:40,borderBottomRightRadius:40},logo:{width:64,height:64,borderRadius:21,backgroundColor:colors.gold,alignItems:'center',justifyContent:'center',...shadow},brand:{color:'white',fontSize:25,fontWeight:'900',marginTop:12},role:{color:'#BCD1C2',fontSize:9,letterSpacing:2.2,marginTop:4,fontWeight:'700'},orbit:{position:'absolute',right:-10,bottom:15,flexDirection:'row',gap:9,opacity:.3},form:{flex:1,paddingHorizontal:spacing.xxl,paddingTop:spacing.xxl},eyebrow:{fontSize:9,letterSpacing:1.7,fontWeight:'900',color:colors.leaf},title:{fontSize:26,lineHeight:32,fontWeight:'900',color:colors.ink,marginTop:7},body:{fontSize:12,lineHeight:18,color:colors.muted,marginTop:7,marginBottom:spacing.lg},input:{height:56,borderWidth:1,borderColor:colors.line,backgroundColor:colors.white,borderRadius:radius.md,flexDirection:'row',alignItems:'center',gap:spacing.md,paddingHorizontal:spacing.lg,marginTop:spacing.md},textInput:{flex:1,height:'100%',color:colors.ink,fontSize:13,fontWeight:'600'},button:{height:56,borderRadius:radius.md,backgroundColor:colors.forest2,marginTop:spacing.lg,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:spacing.md,...shadow},buttonText:{color:'white',fontWeight:'900',fontSize:13},error:{color:colors.red,backgroundColor:colors.paleRed,padding:10,borderRadius:radius.sm,fontSize:10,marginTop:spacing.md},note:{flexDirection:'row',gap:spacing.sm,alignItems:'center',marginTop:spacing.lg,padding:spacing.md,backgroundColor:colors.paleGreen,borderRadius:radius.md},noteText:{},});

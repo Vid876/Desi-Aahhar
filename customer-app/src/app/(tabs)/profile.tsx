@@ -15,16 +15,17 @@ const menu = [
 ] as const;
 
 export default function ProfileScreen() {
-  const { mobileNumber, email, authMethod, signOut, orders, favorites } = useApp();
+  const { mobileNumber, email, authMethod, signOut, orders, favorites, liveMode, connectionError } = useApp();
   const logout = () => Alert.alert('Log out?', 'आपको फिर से OTP verify करना होगा।', [{ text: 'Cancel', style: 'cancel' }, { text: 'Log out', style: 'destructive', onPress: () => { signOut(); router.replace('/welcome'); } }]);
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={styles.header}><Text style={styles.title}>My profile</Text><Image source={require('../../../assets/brand/desi-aahhar-logo.png')} contentFit="contain" style={styles.logo} /></View>
       <View style={styles.profileCard}>
         <View style={styles.avatar}><Text style={styles.avatarText}>VK</Text></View>
-        <View style={styles.profileCopy}><Text style={styles.name}>Vivek Kumar</Text><Text style={styles.phone}>{authMethod === 'email' ? (email || 'vivek@example.com') : `+91 ${mobileNumber || '98765 43210'}`}</Text></View>
+        <View style={styles.profileCopy}><Text style={styles.name}>Vivek Kumar</Text><Text style={styles.phone}>{authMethod === 'email' ? (email || 'vivek@example.com') : (mobileNumber || '+91 98765 43210')}</Text></View>
         <Pressable style={styles.edit}><Ionicons name="pencil" size={16} color={colors.forest} /></Pressable>
       </View>
+      <View style={[styles.connection, connectionError && styles.connectionError]}><View style={[styles.connectionDot, connectionError && styles.connectionDotError]} /><Text style={[styles.connectionText, connectionError && styles.connectionTextError]}>{liveMode ? (connectionError ? `Backend: ${connectionError}` : 'Live backend connected') : 'Demo catalog mode'}</Text></View>
       <View style={styles.stats}>
         <View style={styles.stat}><Text style={styles.statValue}>{orders.length}</Text><Text style={styles.statLabel}>Orders</Text></View>
         <View style={styles.statDivider} />
@@ -56,6 +57,8 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 28, fontWeight: '900' },
   logo: { width: 62, height: 62 },
   profileCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.forestDark, borderRadius: radius.lg, padding: spacing.lg, marginTop: spacing.md },
+  connection: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, alignSelf: 'flex-start', backgroundColor: colors.successLight, borderRadius: radius.pill, paddingHorizontal: spacing.md, paddingVertical: 7, marginTop: spacing.md },
+  connectionError: { backgroundColor: colors.dangerLight }, connectionDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.success }, connectionDotError: { backgroundColor: colors.danger }, connectionText: { color: colors.success, fontSize: 9, fontWeight: '800' }, connectionTextError: { color: colors.danger },
   avatar: { width: 58, height: 58, borderRadius: radius.pill, backgroundColor: colors.saffron, alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: colors.forestDark, fontSize: 18, fontWeight: '900' },
   profileCopy: { flex: 1, marginLeft: spacing.md },

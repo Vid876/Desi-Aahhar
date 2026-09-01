@@ -5,11 +5,12 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AppHeader } from '@/components/AppHeader';
 import { ProductCard } from '@/components/ProductCard';
 import { Screen } from '@/components/Screen';
-import { categories, products } from '@/data/catalog';
+import { useApp } from '@/context/AppContext';
 import { colors, radius, spacing } from '@/theme';
 
 export default function CategoryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { categories, products } = useApp();
   const category = categories.find((item) => item.id === id);
   const items = products.filter((product) => product.categoryId === id);
   if (!category) return <Screen><AppHeader title="Category" /><Text style={styles.notFound}>Category not found.</Text></Screen>;
@@ -18,7 +19,7 @@ export default function CategoryScreen() {
       <AppHeader title={category.name} subtitle={category.hindiName} right={<Pressable onPress={() => router.push('/search')} style={styles.headerIcon}><Ionicons name="search" size={21} color={colors.ink} /></Pressable>} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={[styles.banner, { backgroundColor: category.color }]}>
-          <View><Text style={styles.bannerKicker}>{category.appliesMinimum ? 'KIRANA ESSENTIALS' : 'FRESH & FLEXIBLE'}</Text><Text style={styles.bannerTitle}>{category.hindiName}</Text><Text style={styles.bannerBody}>{category.appliesMinimum ? 'इस category के eligible cart पर ₹500 minimum लागू है।' : 'इस category पर minimum order लागू नहीं है।'}</Text></View>
+          <View><Text style={styles.bannerKicker}>{category.appliesMinimum ? 'KIRANA ESSENTIALS' : 'FRESH & FLEXIBLE'}</Text><Text style={styles.bannerTitle}>{category.hindiName}</Text><Text style={styles.bannerBody}>{category.appliesMinimum ? `इस category पर ₹${category.minimumOrderValue ?? 500} minimum लागू है।` : 'इस category पर minimum order लागू नहीं है।'}</Text></View>
           <Text style={styles.bannerEmoji}>{category.emoji}</Text>
         </View>
         <View style={styles.filterRow}><Text style={styles.result}>{items.length} products</Text><Pressable style={styles.filter}><Ionicons name="options-outline" size={16} color={colors.forest} /><Text style={styles.filterText}>Filter</Text></Pressable></View>

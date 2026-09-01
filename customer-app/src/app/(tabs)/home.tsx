@@ -6,7 +6,6 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ProductCard } from '@/components/ProductCard';
 import { RuleProgress } from '@/components/RuleProgress';
-import { categories, products } from '@/data/catalog';
 import { useApp } from '@/context/AppContext';
 import { colors, formatCurrency, radius, shadow, spacing } from '@/theme';
 
@@ -20,7 +19,8 @@ function SectionHeader({ title, action, onPress }: { title: string; action?: str
 }
 
 export default function HomeScreen() {
-  const { selectedAddress, ruleValidation, orders, repeatOrder } = useApp();
+  const { selectedAddress, ruleValidation, orders, repeatOrder, categories, products } = useApp();
+  const freshCategory = categories.find((category) => !category.appliesMinimum) ?? categories[0];
   const recentOrder = orders.find((order) => order.status === 'DELIVERED');
   return (
     <View style={styles.screen}>
@@ -61,7 +61,7 @@ export default function HomeScreen() {
             <Text style={styles.heroPill}>FRESH ARRIVALS</Text>
             <Text style={styles.heroTitle}>देसी freshness,{`\n`}हर दिन।</Text>
             <Text style={styles.heroBody}>Fresh vegetables पर कोई minimum नहीं</Text>
-            <Pressable onPress={() => router.push({ pathname: '/category/[id]', params: { id: 'vegetables' } })} style={styles.heroButton}>
+            <Pressable onPress={() => freshCategory && router.push({ pathname: '/category/[id]', params: { id: freshCategory.id } })} style={styles.heroButton}>
               <Text style={styles.heroButtonText}>Shop fresh</Text><Ionicons name="arrow-forward" size={14} color={colors.forestDark} />
             </Pressable>
           </View>

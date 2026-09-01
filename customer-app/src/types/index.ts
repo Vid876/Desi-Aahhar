@@ -5,6 +5,7 @@ export type Category = {
   emoji: string;
   color: string;
   appliesMinimum: boolean;
+  minimumOrderValue?: number;
 };
 
 export type ProductVariant = {
@@ -43,6 +44,7 @@ export type Address = {
 };
 
 export type OrderStatus =
+  | 'PAYMENT_PENDING'
   | 'CONFIRMED'
   | 'PICKING'
   | 'PACKED'
@@ -52,6 +54,7 @@ export type OrderStatus =
 
 export type Order = {
   id: string;
+  orderNumber?: string;
   createdAt: string;
   status: OrderStatus;
   total: number;
@@ -77,4 +80,11 @@ export type RuleValidation = {
   remaining: number;
   progress: number;
   hasEligibleItems: boolean;
+  violations?: {
+    categoryId: string;
+    categoryName: string;
+    subtotal: number;
+    threshold: number;
+    remaining: number;
+  }[];
 };

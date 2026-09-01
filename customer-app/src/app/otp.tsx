@@ -1,21 +1,57 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
 import { useApp } from '@/context/AppContext';
+import { apiRequest, endpoints, USE_MOCK_API } from '@/services/api';
 import { colors, radius, spacing } from '@/theme';
 
 export default function OtpScreen() {
-  const { channel = 'phone', destination = '' } = useLocalSearchParams<{ channel: 'phone' | 'email'; destination: string }>();
+  const { channel = 'phone', destination = '', devOtp = '' } = useLocalSearchParams<{ channel: 'phone' | 'email'; destination: string; devOtp?: string }>();
   const { signIn } = useApp();
   const [otp, setOtp] = useState('');
+  const [activeDevOtp, setActiveDevOtp] = useState(String(devOtp));
+  const [busy, setBusy] = useState(false);
   const inputRef = useRef<TextInput>(null);
   const isEmail = channel === 'email';
-  const displayIdentity = isEmail ? destination : `+91 ${destination}`;
-  const verify = () => { signIn(String(destination), isEmail ? 'email' : 'phone'); router.replace('/(tabs)/home'); };
+  const displayIdentity = isEmail ? destination : destination.replace('+91', '+91 ');
+  const verify = async () => {
+    try {
+      setBusy(true);
+      if (USE_MOCK_API) {
+        await signIn(String(destination), isEmail ? 'email' : 'phone');
+      } else {
+        const response = await apiRequest<{ token: string }>(isEmail ? endpoints.verifyEmailOtp : endpoints.verifyOtp, {
+          method: 'POST',
+          body: JSON.stringify(isEmail ? { email: destination, otp } : { phone: destination, otp }),
+        });
+        await signIn(String(destination), isEmail ? 'email' : 'phone', response.token);
+      }
+      router.replace('/(tabs)/home');
+    } catch (error) {
+      Alert.alert('OTP verify नहीं हुआ', error instanceof Error ? error.message : 'कृपया सही OTP डालें।');
+    } finally {
+      setBusy(false);
+    }
+  };
+  const resend = async () => {
+    try {
+      setBusy(true);
+      if (USE_MOCK_API) return;
+      const response = await apiRequest<{ devOtp?: string }>(isEmail ? endpoints.sendEmailOtp : endpoints.sendOtp, {
+        method: 'POST', body: JSON.stringify(isEmail ? { email: destination } : { phone: destination }),
+      });
+      setActiveDevOtp(response.devOtp ?? '');
+      Alert.alert('OTP भेज दिया गया', `नया code ${displayIdentity} पर भेजा गया है।`);
+    } catch (error) {
+      Alert.alert('OTP नहीं भेजा गया', error instanceof Error ? error.message : 'कृपया थोड़ी देर बाद कोशिश करें।');
+    } finally {
+      setBusy(false);
+    }
+  };
   return (
     <Screen>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
@@ -30,14 +66,14 @@ export default function OtpScreen() {
           </Pressable>
           <TextInput ref={inputRef} autoFocus keyboardType="number-pad" maxLength={6} value={otp}
             onChangeText={(value) => setOtp(value.replace(/\D/g, ''))} style={styles.hiddenInput} />
-          <Text style={styles.demo}>Demo mode: कोई भी 6-digit OTP डालें</Text>
-          <Pressable><Text style={styles.resend}>OTP नहीं मिला? <Text style={styles.resendStrong}>फिर से भेजें</Text></Text></Pressable>
+          {USE_MOCK_API || activeDevOtp ? <Text style={styles.demo}>{USE_MOCK_API ? 'Demo mode: कोई भी 6-digit OTP डालें' : `Local testing OTP: ${activeDevOtp}`}</Text> : null}
+          <Pressable disabled={busy} onPress={resend}><Text style={styles.resend}>OTP नहीं मिला? <Text style={styles.resendStrong}>फिर से भेजें</Text></Text></Pressable>
           <Pressable onPress={() => router.replace(isEmail ? '/login' : '/email-login')} style={styles.switchMethod}>
             <Ionicons name={isEmail ? 'phone-portrait-outline' : 'mail-outline'} size={17} color={colors.forest} />
             <Text style={styles.switchMethodText}>{isEmail ? 'Mobile OTP इस्तेमाल करें' : 'Email पर OTP लें'}</Text>
           </Pressable>
         </View>
-        <PrimaryButton label="Verify & Continue" icon="checkmark" disabled={otp.length !== 6} onPress={verify} style={styles.button} />
+        <PrimaryButton label={busy ? 'Verify हो रहा है…' : 'Verify & Continue'} icon="checkmark" disabled={otp.length !== 6 || busy} onPress={verify} style={styles.button} />
       </KeyboardAvoidingView>
     </Screen>
   );

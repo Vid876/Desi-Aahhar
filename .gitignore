@@ -1,0 +1,27 @@
+# Local secrets and credentials
+.env
+!.env.example
+secrets/
+**/google-services.json
+**/GoogleService-Info.plist
+
+# JavaScript / Expo
+**/node_modules/
+.pnpm-store/
+**/.expo/
+**/dist/
+**/dist-test/
+**/.turbo/
+*.tsbuildinfo
+admin-web/vite.config.js
+admin-web/vite.config.d.ts
+
+# Java / runtime data
+backend/target/
+backend/uploads/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

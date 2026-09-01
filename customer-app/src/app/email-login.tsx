@@ -1,16 +1,35 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
+import { apiRequest, endpoints, USE_MOCK_API } from '@/services/api';
 import { colors, radius, spacing } from '@/theme';
 
 export default function EmailLoginScreen() {
   const [email, setEmail] = useState('');
+  const [sending, setSending] = useState(false);
   const normalizedEmail = email.trim().toLowerCase();
   const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
+  const sendOtp = async () => {
+    if (USE_MOCK_API) {
+      router.push({ pathname: '/otp', params: { channel: 'email', destination: normalizedEmail } });
+      return;
+    }
+    try {
+      setSending(true);
+      const result = await apiRequest<{ devOtp?: string }>(endpoints.sendEmailOtp, {
+        method: 'POST', body: JSON.stringify({ email: normalizedEmail }),
+      });
+      router.push({ pathname: '/otp', params: { channel: 'email', destination: normalizedEmail, devOtp: result.devOtp ?? '' } });
+    } catch (error) {
+      Alert.alert('Email OTP नहीं भेजा गया', error instanceof Error ? error.message : 'कृपया दोबारा कोशिश करें।');
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <Screen>
@@ -43,10 +62,10 @@ export default function EmailLoginScreen() {
           </View>
         </View>
         <PrimaryButton
-          label="Email OTP भेजें"
+          label={sending ? 'भेज रहे हैं…' : 'Email OTP भेजें'}
           icon="arrow-forward"
-          disabled={!valid}
-          onPress={() => router.push({ pathname: '/otp', params: { channel: 'email', destination: normalizedEmail } })}
+          disabled={!valid || sending}
+          onPress={sendOtp}
           style={styles.button}
         />
         <Pressable onPress={() => router.replace('/login')} style={styles.phoneFallback}>

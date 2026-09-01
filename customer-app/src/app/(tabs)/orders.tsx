@@ -3,19 +3,19 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { EmptyState } from '@/components/EmptyState';
-import { products } from '@/data/catalog';
 import { useApp } from '@/context/AppContext';
 import { colors, formatCurrency, radius, spacing } from '@/theme';
 import { OrderStatus } from '@/types';
 
 const statusStyle: Record<OrderStatus, { label: string; color: string; bg: string }> = {
+  PAYMENT_PENDING: { label: 'Payment pending', color: colors.brown, bg: colors.saffronLight },
   CONFIRMED: { label: 'Confirmed', color: colors.info, bg: colors.infoLight }, PICKING: { label: 'Picking', color: colors.brown, bg: colors.saffronLight },
   PACKED: { label: 'Packed', color: colors.brown, bg: colors.saffronLight }, OUT_FOR_DELIVERY: { label: 'On the way', color: colors.info, bg: colors.infoLight },
   DELIVERED: { label: 'Delivered', color: colors.success, bg: colors.successLight }, CANCELLED: { label: 'Cancelled', color: colors.danger, bg: colors.dangerLight },
 };
 
 export default function OrdersScreen() {
-  const { orders, repeatOrder } = useApp();
+  const { orders, repeatOrder, products } = useApp();
   if (!orders.length) return <View style={styles.screen}><View style={styles.header}><Text style={styles.title}>My orders</Text></View><EmptyState icon="receipt-outline" title="No orders yet" body="Your confirmed orders and live delivery tracking will appear here." action="Browse products" onAction={() => router.push('/(tabs)/home')} /></View>;
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -25,7 +25,7 @@ export default function OrdersScreen() {
         return (
           <Pressable key={order.id} onPress={() => router.push({ pathname: '/order/[id]', params: { id: order.id } })} style={styles.card}>
             <View style={styles.cardTop}>
-              <View><Text style={styles.orderId}>#{order.id}</Text><Text style={styles.date}>{new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</Text></View>
+              <View><Text style={styles.orderId}>#{order.orderNumber ?? order.id}</Text><Text style={styles.date}>{new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</Text></View>
               <View style={[styles.status, { backgroundColor: status.bg }]}><View style={[styles.statusDot, { backgroundColor: status.color }]} /><Text style={[styles.statusText, { color: status.color }]}>{status.label}</Text></View>
             </View>
             <View style={styles.emojis}>{order.items.slice(0, 5).map((item) => <View key={`${item.productId}-${item.variantId}`} style={styles.emojiCircle}><Text style={styles.emoji}>{products.find((product) => product.id === item.productId)?.emoji ?? '🛍️'}</Text></View>)}</View>

@@ -5,12 +5,11 @@ import { AppHeader } from '@/components/AppHeader';
 import { EmptyState } from '@/components/EmptyState';
 import { ProductCard } from '@/components/ProductCard';
 import { Screen } from '@/components/Screen';
-import { products } from '@/data/catalog';
 import { useApp } from '@/context/AppContext';
 import { spacing } from '@/theme';
 
 export default function WishlistScreen() {
-  const { favorites } = useApp();
+  const { favorites, products } = useApp();
   const items = products.filter((product) => favorites.includes(product.id));
   return (
     <Screen>

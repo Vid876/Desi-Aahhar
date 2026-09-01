@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "देसी Aahhar Delivery",
+    "slug": "desi-aahhar-delivery",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "../customer-app/assets/brand/desi-aahhar-logo.png",
+    "scheme": "desiaahhardelivery",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "com.vid876.desiaahhar.delivery",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Location is shared while delivering an assigned order.",
+        "NSCameraUsageDescription": "Camera is used to capture delivery proof."
+      }
+    },
+    "android": {
+      "package": "com.vid876.desiaahhar.delivery",
+      "predictiveBackGestureEnabled": true,
+      "adaptiveIcon": {
+        "backgroundColor": "#FFF9EC",
+        "foregroundImage": "../customer-app/assets/brand/desi-aahhar-logo.png",
+        "monochromeImage": "../customer-app/assets/brand/desi-aahhar-logo.png"
+      },
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION", "CAMERA", "POST_NOTIFICATIONS"]
+    },
+    "plugins": [
+      "expo-router",
+      ["expo-notifications", { "defaultChannel": "deliveries" }],
+      ["expo-image-picker", { "cameraPermission": "Capture a photo as delivery proof.", "microphonePermission": false }],
+      ["expo-location", { "locationWhenInUsePermission": "Share location while delivering an assigned order." }]
+    ],
+    "experiments": { "typedRoutes": true, "reactCompiler": true },
+    "extra": { "router": {} },
+    "owner": "vid687s-team"
+  }
+}

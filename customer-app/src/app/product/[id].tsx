@@ -5,14 +5,13 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { QuantityStepper } from '@/components/QuantityStepper';
-import { categories, products } from '@/data/catalog';
 import { useApp } from '@/context/AppContext';
 import { colors, formatCurrency, radius, spacing } from '@/theme';
 
 export default function ProductDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { addToCart, favorites, toggleFavorite, cartCount, categories, products } = useApp();
   const product = products.find((item) => item.id === id);
-  const { addToCart, favorites, toggleFavorite, cartCount } = useApp();
   const [variantId, setVariantId] = useState(product?.variants[0]?.id ?? '');
   const [quantity, setQuantity] = useState(1);
   const variant = useMemo(() => product?.variants.find((item) => item.id === variantId) ?? product?.variants[0], [product, variantId]);
@@ -46,7 +45,7 @@ export default function ProductDetailsScreen() {
           </View>
           <View style={styles.priceRow}><View><Text style={styles.price}>{formatCurrency(variant.price * quantity)}</Text><Text style={styles.mrp}>MRP {formatCurrency(variant.mrp * quantity)} • incl. taxes</Text></View><QuantityStepper value={quantity} onChange={(value) => setQuantity(Math.max(1, value))} /></View>
           {saving > 0 ? <View style={styles.saving}><Ionicons name="sparkles" size={16} color={colors.success} /><Text style={styles.savingText}>You save {formatCurrency(saving)} on this item</Text></View> : null}
-          <View style={styles.ruleInfo}><Ionicons name={category?.appliesMinimum ? 'basket-outline' : 'checkmark-circle-outline'} size={20} color={colors.forest} /><View><Text style={styles.ruleTitle}>{category?.appliesMinimum ? '₹500 category rule applies' : 'No minimum order for this item'}</Text><Text style={styles.ruleBody}>{category?.appliesMinimum ? 'Cart will show your eligible grocery progress.' : 'Fresh category—checkout even with a smaller cart.'}</Text></View></View>
+          <View style={styles.ruleInfo}><Ionicons name={category?.appliesMinimum ? 'basket-outline' : 'checkmark-circle-outline'} size={20} color={colors.forest} /><View><Text style={styles.ruleTitle}>{category?.appliesMinimum ? `₹${category.minimumOrderValue ?? 500} category rule applies` : 'No minimum order for this item'}</Text><Text style={styles.ruleBody}>{category?.appliesMinimum ? 'Cart will show your eligible grocery progress.' : 'Fresh category—checkout even with a smaller cart.'}</Text></View></View>
           <Text style={styles.sectionTitle}>Why you’ll love it</Text>
           <Text style={styles.description}>{product.description}</Text>
           <View style={styles.benefits}>{[['leaf-outline', 'Quality checked'], ['shield-checkmark-outline', 'Easy returns'], ['flash-outline', 'Fast delivery']].map(([icon, text]) => <View key={text} style={styles.benefit}><View style={styles.benefitIcon}><Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={18} color={colors.forest} /></View><Text style={styles.benefitText}>{text}</Text></View>)}</View>

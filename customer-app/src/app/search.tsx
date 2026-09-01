@@ -5,18 +5,19 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-
 
 import { EmptyState } from '@/components/EmptyState';
 import { ProductCard } from '@/components/ProductCard';
-import { categories, products } from '@/data/catalog';
+import { useApp } from '@/context/AppContext';
 import { colors, radius, spacing } from '@/theme';
 
 const recent = ['Chakki atta', 'Fresh vegetables', 'Toor dal'];
 
 export default function SearchScreen() {
+  const { categories, products } = useApp();
   const [query, setQuery] = useState('');
   const results = useMemo(() => {
     const value = query.trim().toLowerCase();
     if (!value) return [];
     return products.filter((item) => `${item.name} ${item.hindiName} ${categories.find((category) => category.id === item.categoryId)?.name}`.toLowerCase().includes(value));
-  }, [query]);
+  }, [categories, products, query]);
   return (
     <View style={styles.screen}>
       <View style={styles.header}>

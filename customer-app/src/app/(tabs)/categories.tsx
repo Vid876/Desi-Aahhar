@@ -3,10 +3,11 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ProductCard } from '@/components/ProductCard';
-import { categories, products } from '@/data/catalog';
+import { useApp } from '@/context/AppContext';
 import { colors, radius, spacing } from '@/theme';
 
 export default function CategoriesScreen() {
+  const { categories, products } = useApp();
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>

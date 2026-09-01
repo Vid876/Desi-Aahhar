@@ -1,15 +1,35 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
+import { apiRequest, endpoints, USE_MOCK_API } from '@/services/api';
 import { colors, radius, spacing } from '@/theme';
 
 export default function LoginScreen() {
   const [mobile, setMobile] = useState('');
+  const [sending, setSending] = useState(false);
   const valid = mobile.replace(/\D/g, '').length === 10;
+  const sendOtp = async () => {
+    const destination = `+91${mobile}`;
+    if (USE_MOCK_API) {
+      router.push({ pathname: '/otp', params: { channel: 'phone', destination } });
+      return;
+    }
+    try {
+      setSending(true);
+      const result = await apiRequest<{ devOtp?: string }>(endpoints.sendOtp, {
+        method: 'POST', body: JSON.stringify({ phone: destination }),
+      });
+      router.push({ pathname: '/otp', params: { channel: 'phone', destination, devOtp: result.devOtp ?? '' } });
+    } catch (error) {
+      Alert.alert('OTP नहीं भेजा गया', error instanceof Error ? error.message : 'कृपया दोबारा कोशिश करें।');
+    } finally {
+      setSending(false);
+    }
+  };
   return (
     <Screen>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
@@ -34,8 +54,8 @@ export default function LoginScreen() {
             <Text style={styles.secure}>Your details are secure with us.</Text>
           </View>
         </View>
-        <PrimaryButton label="OTP भेजें" icon="arrow-forward" disabled={!valid}
-          onPress={() => router.push({ pathname: '/otp', params: { channel: 'phone', destination: mobile } })} style={styles.button} />
+        <PrimaryButton label={sending ? 'भेज रहे हैं…' : 'OTP भेजें'} icon="arrow-forward" disabled={!valid || sending}
+          onPress={sendOtp} style={styles.button} />
         <Pressable onPress={() => router.push('/email-login')} style={styles.emailFallback}>
           <Ionicons name="mail-outline" size={18} color={colors.forest} />
           <Text style={styles.emailFallbackText}>Mobile OTP नहीं आया? Email से जारी रखें</Text>

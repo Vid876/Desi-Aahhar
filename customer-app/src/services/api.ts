@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://10.0.2.2:8080/api/v1';
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://10.0.2.2:8080/api/v1';
 export const USE_MOCK_API = process.env.EXPO_PUBLIC_USE_MOCK_API !== 'false';
 
 type RequestOptions = RequestInit & { token?: string };
@@ -19,6 +19,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     const error = await response.json().catch(() => ({ message: 'Something went wrong' }));
     throw new Error(error.message ?? `Request failed (${response.status})`);
   }
+  if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;
 }
 
@@ -35,4 +36,8 @@ export const endpoints = {
   checkoutPreview: '/checkout/preview',
   orders: '/orders',
   createPayment: '/payments/create',
+  verifyPayment: '/payments/verify',
+  offers: '/offers',
+  devices: '/notifications/devices',
+  notifications: '/notifications',
 };

@@ -5,7 +5,6 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AppHeader } from '@/components/AppHeader';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
-import { products } from '@/data/catalog';
 import { useApp } from '@/context/AppContext';
 import { colors, formatCurrency, radius, spacing } from '@/theme';
 import { OrderStatus } from '@/types';
@@ -20,14 +19,14 @@ const timeline: { status: OrderStatus; title: string; body: string; icon: keyof 
 
 export default function OrderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { orders, repeatOrder } = useApp();
+  const { orders, repeatOrder, products } = useApp();
   const order = orders.find((item) => item.id === id);
   if (!order) return <Screen><AppHeader title="Order" /><View style={styles.notFound}><Text>Order not found.</Text></View></Screen>;
   const currentIndex = timeline.findIndex((item) => item.status === order.status);
   const delivered = order.status === 'DELIVERED';
   return (
     <Screen>
-      <AppHeader title={`Order #${order.id}`} subtitle={new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })} />
+      <AppHeader title={`Order #${order.orderNumber ?? order.id}`} subtitle={new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {!delivered ? <View style={styles.liveCard}><View style={styles.liveIcon}><Ionicons name="bicycle" size={27} color={colors.white} /></View><View style={styles.liveCopy}><Text style={styles.liveKicker}>LIVE ORDER</Text><Text style={styles.liveTitle}>{order.status === 'OUT_FOR_DELIVERY' ? 'आपका order रास्ते पर है' : 'We’re preparing your order'}</Text><Text style={styles.liveBody}>Expected in selected slot: {order.deliverySlot}</Text></View></View> : null}
         <Text style={styles.sectionTitle}>Order journey</Text>

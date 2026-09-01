@@ -28,6 +28,13 @@
     "plugins": [
       "expo-router",
       [
+        "expo-notifications",
+        {
+          "color": "#246B3C",
+          "defaultChannel": "orders"
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#FFF9EC",

@@ -1,58 +1,22 @@
-# Spring Boot API integration
+# Customer API map
 
-The app runs immediately with its local demo catalog and persistent state. Set `EXPO_PUBLIC_USE_MOCK_API=false` and configure `EXPO_PUBLIC_API_BASE_URL` when the Spring Boot API is ready.
+The app uses these implemented Spring Boot endpoints when `EXPO_PUBLIC_USE_MOCK_API=false`.
 
-## Client-to-API map
+| Flow | Endpoint |
+| --- | --- |
+| Send/verify phone OTP | `POST /auth/send-otp`, `POST /auth/verify-otp` |
+| Send/verify email OTP | `POST /auth/email/send-otp`, `POST /auth/email/verify-otp` |
+| Catalog and offers | `GET /categories`, `GET /products`, `GET /offers` |
+| Server cart | `GET /cart`, `POST/PATCH/DELETE /cart/items` |
+| Price/rule validation | `POST /cart/validate`, `GET /checkout/preview` |
+| Create/list/track order | `POST/GET /orders`, `GET /orders/{id}` |
+| Razorpay | `POST /payments/create`, `POST /payments/verify` |
+| Push and in-app alerts | `POST /notifications/devices`, `GET /notifications` |
 
-| App flow | Endpoint | Notes |
-| --- | --- | --- |
-| Send OTP | `POST /auth/send-otp` | Phone number, rate-limited server-side |
-| Verify OTP | `POST /auth/verify-otp` | Returns access + refresh JWT |
-| Send email OTP | `POST /auth/email/send-otp` | Fallback when SMS delivery fails; rate-limit by email and device |
-| Verify email OTP | `POST /auth/email/verify-otp` | Links the verified email to the same customer account |
-| Categories | `GET /categories` | Includes rule/exempt display metadata |
-| Products | `GET /products?categoryId=` | Product and variant remain separate |
-| Search | `GET /search?q=` | Catalog search |
-| Cart | `GET/POST /cart`, `POST /cart/items` | Backend remains price authority |
-| Rule preview | `POST /cart/validate` | Returns valid, reason and remaining amount |
-| Checkout preview | `POST /checkout/preview` | Rechecks price, stock, rules, coupon and delivery |
-| Create order | `POST /orders` | Send a unique `Idempotency-Key` |
-| Payment | `POST /payments/create` | Razorpay order creation; verify webhook server-side |
-| Track order | `GET /orders/{id}` | Status history and delivery assignment |
+The backend is the final authority for price, stock, coupon, category minimum and payment signatures. The app keeps an optimistic local cart for fast rendering and refreshes it from the server after authentication.
 
-## Expected cart validation response
+Order lifecycle:
 
-```json
-{
-  "valid": false,
-  "ruleGroups": [
-    {
-      "code": "KIRANA_MIN_500",
-      "eligibleSubtotal": 400,
-      "threshold": 500,
-      "remaining": 100,
-      "message": "Add ₹100 more from eligible grocery"
-    }
-  ]
-}
-```
+`PAYMENT_PENDING -> CONFIRMED -> PICKING -> PACKED -> OUT_FOR_DELIVERY -> DELIVERED`
 
-The mobile app never decides final checkout eligibility in production. Its local rule engine exists for demo UX and tests; the server response replaces it when mock mode is disabled.
-
-## Authentication fallback contract
-
-The primary path remains mobile OTP. If SMS is delayed or unavailable, the customer can switch to email OTP from either the mobile-entry or OTP screen.
-
-```json
-{
-  "email": "customer@example.com"
-}
-```
-
-Email OTP verification should return the same access/refresh JWT response shape as mobile verification. The backend should resolve or link both verified identities to one customer record, expire codes quickly, enforce attempt limits and avoid revealing whether an email is already registered.
-
-## Order status contract
-
-`CONFIRMED -> PICKING -> PACKED -> OUT_FOR_DELIVERY -> DELIVERED`
-
-Payment failures/timeouts should release inventory reservations and transition the order to a cancelled/expired state. Old orders must retain their item, price and rule snapshots.
+When an online checkout is cancelled before verification, `POST /orders/{id}/cancel` releases reserved stock and restores the server cart.
