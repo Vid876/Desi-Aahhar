@@ -23,7 +23,7 @@ Docker images आपके Docker Hub ID के हिसाब से named ह
 Requirements: Docker Desktop running हो। फिर PowerShell में repository खोलें:
 
 ```powershell
-cd "C:\Users\Asus\Documents\ChatGPT\देसी Aahhar"
+cd "PATH\TO\Desi-Aahhar"
 Copy-Item .env.example .env
 docker compose up --build -d
 docker compose ps
@@ -55,7 +55,7 @@ Database data बचा रहता है। केवल local test database 
 ## VS Code में खोलना
 
 ```powershell
-cd "C:\Users\Asus\Documents\ChatGPT\देसी Aahhar"
+cd "PATH\TO\Desi-Aahhar"
 code .
 ```
 
